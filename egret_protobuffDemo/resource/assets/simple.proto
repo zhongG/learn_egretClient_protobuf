@@ -1,0 +1,13 @@
+syntax = "proto2";
+option java_outer_classname = "MessageProto";
+
+message ArrayItem{
+    required int32 ke=1;
+    required int32 bs=2;
+    required int32 se=3;
+}
+message test{
+    required int32 a=1;//
+    required int32 b=2;
+    repeated ArrayItem list=3;
+}
