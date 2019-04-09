@@ -1,13 +1,51 @@
-syntax = "proto2";
+syntax = "proto3";
 option java_outer_classname = "MessageProto";
 
+message RequestUser{
+    optional string user_name = 1;
+    optional int32 age = 2;
+    optional string password = 3;
+}
+
 message ArrayItem{
-    required int32 ke=1;
-    required int32 bs=2;
-    required int32 se=3;
+    optional  int32 ke=1;
+    optional  int32 bs=2;
+    optional  int32 se=3;
 }
 message test{
     required int32 a=1;//
     required int32 b=2;
     repeated ArrayItem list=3;
+    repeated int32 sim=4;
+    repeated int32 sim2=5;
+}
+
+
+message header {
+    enum messageIds{
+        Msg1=1;
+        Msg2=2;
+        Msg3=3;
+    }
+    required messageIds messageid=1;
+    oneof messageBody{
+          Body1 body1=2;
+          Body2 body2=3;
+    }
+    optional Body3 body3=4;
+}
+
+message Body1{
+    optional int32 bodyid=1;
+    optional string bodymessage=2;
+}
+
+message Body2{
+    optional int32 bodyid=1;
+    optional string bodymessage=2;
+}
+
+message Body3{
+    optional int32 bodyid=1;
+    optional string testid=2;
 }

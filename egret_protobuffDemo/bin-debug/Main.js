@@ -71,7 +71,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var ByteArray = egret.ByteArray;
 var Main = (function (_super) {
     __extends(Main, _super);
     function Main() {
@@ -216,12 +215,19 @@ var Main = (function (_super) {
                 console.log("IO_ERROR", response);
             }, this);
             socket_1.addEventListener(egret.ProgressEvent.SOCKET_DATA, function (response) {
-                //console.log("onMessage", response);
+                console.log("onMessage", response, egret.WebSocket.TYPE_BINARY);
                 if (socket_1.type == egret.WebSocket.TYPE_BINARY) {
-                    var bytes = new ByteArray();
+                    var bytes = new egret.ByteArray();
                     socket_1.readBytes(bytes);
-                    var string = bytes.readUTFBytes(bytes.length);
-                    console.log("onMessage Bytes", bytes, bytes.bytes, string);
+                    //let string = bytes.readUTFBytes(bytes.length);
+                    console.log("onMessage Bytes", bytes);
+                    var modelProtobufText = RES.getRes("simple_proto");
+                    console.log(modelProtobufText);
+                    var modelProtobuf = dcodeIO.ProtoBuf.loadProto(modelProtobufText);
+                    var modelstruct = modelProtobuf.build("RequestUser");
+                    var arrayBuffer = bytes.rawBuffer;
+                    response = modelstruct.decode(arrayBuffer);
+                    console.log(response);
                 }
                 if (socket_1.type == egret.WebSocket.TYPE_STRING) {
                     var stringGet = socket_1.readUTF();
@@ -270,15 +276,39 @@ var Main = (function (_super) {
             var modelProtobufText = RES.getRes("simple_proto");
             console.log(modelProtobufText);
             var modelProtobuf = dcodeIO.ProtoBuf.loadProto(modelProtobufText);
-            var modelstruct = modelProtobuf.build("test");
-            var struct = new modelstruct({ "a": 123, "b": 123, "list": [{ ke: 1, bs: 2, se: 3 }, { ke: 2, bs: 3, se: 2 }] });
+            /**
+             *测试基础结构通信  成功
+             */
+            //let modelstruct = modelProtobuf.build("test");
+            //let struct = new modelstruct({
+            //    "a": 123,
+            //    "b": 123,
+            //    "sim": 1,
+            //    "list": [{bs: 2, se: 3}, {ke: 2, bs: 3, se: 2}]
+            //});
+            /**
+             *   测试oneof 结构
+             */
+            var modulstruct = modelProtobuf.build("header");
+            var struct = new modulstruct({
+                messageid: 3,
+                body1: {
+                    bodyid: 5,
+                    bodymessage: "body1 message"
+                },
+                body2: {
+                    bodyid: 2,
+                    bodymessage: "body2 message"
+                },
+                body3: {
+                    bodyid: 4,
+                    testid: "test"
+                }
+            });
             var bytes = struct.toArrayBuffer();
-            console.log("序列化数据", bytes);
-            console.log("反序列化数据", modelstruct.decode(bytes));
             var pushMessage = new egret.ByteArray();
-            pushMessage.writeShort(10001);
+            //pushMessage.writeFloat(1000);
             pushMessage.writeBytes(new egret.ByteArray(bytes));
-            console.log("推送序列化", pushMessage);
             socket.writeBytes(pushMessage);
             socket.flush();
         }
